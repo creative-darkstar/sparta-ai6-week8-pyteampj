@@ -14,4 +14,4 @@
 
 ## 설치 필요 패키지
 - Flask
-- firebase_admin
+- pyrebase
