@@ -67,7 +67,8 @@ def set_user_info(userid, password, nickname, name, email):
     try:
         UserInfo.document(userid).set(data)
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False
 
 # document id, document 안의 모든 요소 출력
