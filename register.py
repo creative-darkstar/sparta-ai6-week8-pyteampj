@@ -1,36 +1,45 @@
+import json
 import re
 import hashlib
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-
-# DB 초기화
-cred = credentials.Certificate('authentication/firebase_auth.json')
-firebase_admin.initialize_app(cred)
-db = firestore.client()
-UserInfo = db.collection('UserInfo')
+#
+# # DB 초기화
+# cred = credentials.Certificate('authentication/firebase_auth.json')
+# firebase_admin.initialize_app(cred)
+# db = firestore.client()
+# UserInfo = db.collection('UserInfo')
 
 
 # 유저 아이디 중복 체크
-def check_id(userid):
+def check_id(UserInfo, userid):
     userid = str(userid)
-    lst = [i.id for i in UserInfo.list_documents()]
-    if userid in lst:
-        return False
+    idc = r'^(?=.*[A-Za-z])[A-Za-z\d]{1,}$'
+    if re.match(idc, userid):
+        lst = [i.id for i in UserInfo.list_documents()]
+        if userid in lst:
+            return False
+        else:
+            return True
     else:
-        return True
+        return False
 
 
 # 데이터 무결성 체크 - 회원가입용
-def check_signup_data(userid, password, nickname, name, email):
-    idc = r'^[A-Za-z\d]$'
-    pwc = r'^[A-Za-z\d]$'
-    nickc = r'^[A-Za-z\dㄱ-ㅣ가-힣]$'
-    namec = r'^[A-Za-z\dㄱ-ㅣ가-힣]$'
+def check_signup_data(password, nickname, name, email):
+    password = str(password)
+    nickname = str(nickname)
+    name = str(name)
+    email = str(email)
+
+    pwc = r'^[A-Za-z\d]{4,}$'
+    nickc = r'^[A-Za-z\dㄱ-ㅣ가-힣]{1,}$'
+    namec = r'^[A-Za-z\dㄱ-ㅣ가-힣]{1,}$'
     emailc = r'^^[a-zA-Z0-9+-\_.ㄱ-ㅣ가-힣]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
 
-    templist = [userid, password, nickname, name, email]
-    checklist = [idc, pwc, nickc, namec, emailc]
+    templist = [password, nickname, name, email]
+    checklist = [pwc, nickc, namec, emailc]
     for i,e in enumerate(templist):
         if re.match(checklist[i], e):
             checklist[i] = True
@@ -49,7 +58,7 @@ def check_password(password, checkpassword):
 
 
 # 유저 데이터 DB에 추가
-def set_user_info(userid, password, nickname, name, email):
+def set_user_info(UserInfo, userid, password, nickname, name, email):
     userid = str(userid)
     nickname = str(nickname)
     name = str(name)

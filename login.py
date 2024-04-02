@@ -3,18 +3,18 @@ import hashlib
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-
-# DB 초기화
-cred = credentials.Certificate('authentication/firebase_auth.json')
-firebase_admin.initialize_app(cred)
-db = firestore.client()
-UserInfo = db.collection('UserInfo')
+#
+# # DB 초기화
+# cred = credentials.Certificate('authentication/firebase_auth.json')
+# firebase_admin.initialize_app(cred)
+# db = firestore.client()
+# UserInfo = db.collection('UserInfo')
 
 
 # 데이터 무결성 체크 - 로그인용
 def check_login_data(userid, password):
-    idc = r'^[A-Za-z\d]$'
-    pwc = r'^[A-Za-z\d]$'
+    idc = r'^(?=.*[A-Za-z])[A-Za-z\d]{1,}$'
+    pwc = r'^[A-Za-z\d]{4,}$'
 
     if re.match(idc, userid) and re.match(pwc, password):
         return True
@@ -23,7 +23,7 @@ def check_login_data(userid, password):
 
 
 # 로그인 체크
-def check_login(userid, password):
+def check_login(UserInfo, userid, password):
     if check_login_data(userid, password):
         if UserInfo.document(userid).get().to_dict() != None:
             password = hashlib.sha256(password.encode('utf-8')).hexdigest()
