@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈페이지</title>
+</head>
+
+<body>
+    <h1>게시판</h1>
+    <ul>
+        {% for post in posts %}
+        <li>
+            <a href="/edit/{{ post.post_id }}">{{ post.title }}</a>
+
+            <!-- <a href="/edit/{{ loop.index0 }}">{{ post.title }}</a> -->
+            - {{ post.category }}
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="/write">글 작성</a>
+</body>
+
+</html>

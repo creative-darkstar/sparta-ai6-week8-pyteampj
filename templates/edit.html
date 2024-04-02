@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Post</title>
+</head>
+
+<body>
+    <h1>Edit Post</h1>
+    <form action="{{ url_for('edit', post_id=post_id) }}" method="post"> <!-- 수정 -->
+
+        <!-- <form action="/edit/{{ post.id }}" method="post"> -->
+
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title" value="{{ post.title }}"><br>
+        <label for="category">Category:</label><br>
+        <select id="category" name="category">
+            <option value="category1" {% if post.category=='category1' %} selected {% endif %}>Category 1</option>
+            <option value="category2" {% if post.category=='category2' %} selected {% endif %}>Category 2</option>
+        </select><br>
+        <label for="content">Content:</label><br>
+        <!-- <textarea id="content" name="content">{{ post.content }}</textarea><br> -->
+        <textarea id="content" name="content">{{ post['content'] }}</textarea><br>
+
+        <input type="submit" value="Submit">
+    </form>
+</body>
+
+</html>
