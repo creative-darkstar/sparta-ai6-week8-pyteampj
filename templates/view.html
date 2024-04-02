@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+</head>
+
+<body>
+    <h1>Hello, World!</h1>
+    <button type="button" class="sign-up-button" onclick="location.href='/edit/{{ data.contentinfo_id }}'">수정</button>
+    <h2>{{ data.content.title }}</h2>
+    <p>{{ data.content.userinfo_id }}</p>
+    <p>{{ data.content.create_date }}</p>
+    <p>{{ data.content.update_date }}</p>
+    <p>댓글</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">작성자</th>
+                <th scope="col">댓글</th>
+                <th scope="col">최근수정일시</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data.comments %}
+            <tr>
+                <td>{{ item.userinfo_id }}</td>
+                <td>{{ item.comment }}</td>
+                <td>{{ item.cm_update_date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
