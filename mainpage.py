@@ -19,11 +19,13 @@ is_secret=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['is_secre
 update_date=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['update_date']
 userinfo_id=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['userinfo_id']
 nickname=userlist.document('test1').get().to_dict()['nickname']
-print(categroy,title,content,is_secret,update_date,userinfo_id,nickname)
+test=contentlist.stream()
+for doc in test:
+    print(f'{doc.id}=>{doc.to_dict()}')
 
-@app.route("/")
-def mainpage():
-    return render_template("mainpage.html")
+# @app.route("/")
+# def mainpage():
+#     return render_template("mainpage.html")
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)

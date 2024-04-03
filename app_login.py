@@ -33,7 +33,7 @@ def login():
                 session["logged_in"] = True
                 session['userid'] = userid
                 print(session)
-                return redirect(url_for('mainpage'))
+                return redirect(url_for('mainpage',sessions=session))
             else:
                 print('아이디와 비밀번호를 정확히 입력해 주세요')
                 return render_template('login.html')
@@ -63,8 +63,9 @@ def register():
         return render_template('register.html')
 
 
-@app.route("/mainpage", methods=['GET', 'POST'])
+@app.route("/mainpage", methods=['GET'])
 def mainpage():
+    sessions=request.args.get('sessions')
     categroy=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['category']
     title=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['title']
     content=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['content']
