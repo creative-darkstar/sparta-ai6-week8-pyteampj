@@ -13,8 +13,10 @@
         {% for post in posts %}
         <li>
             {{ post.title }}</a><br>
-            - 작성자 : {{ post.author }}<br>
-            - 작성 시간 : {{ post.timestamp }}<br>
+            - 작성자 : {{ post.userinfo_id }}<br>
+            - 작성 시간 : {{ post.create_date }}<br>
+            - 수정 시간 : {{ post.update_date }}<br>
+
 
             <!-- <a href="/edit/{{ loop.index0 }}">{{ post.title }}</a> -->
             <!-- 임의로 페이지를 띄우기 위해 loop.index0 -->
