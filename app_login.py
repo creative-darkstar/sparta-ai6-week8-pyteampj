@@ -36,7 +36,7 @@ def login():
                 session["logged_in"] = True
                 session['userid'] = userid
                 print(session)
-                return redirect(url_for('mainpage', sessions=session))
+                return redirect(url_for('mainpage'))
             else:
                 print('아이디와 비밀번호를 정확히 입력해 주세요')
                 return render_template('login.html')
@@ -68,11 +68,10 @@ def register():
 
 @app.route("/mainpage", methods=['GET', 'POST'])
 def mainpage():
-    sessions = request.args.get('sessions')
     # if sessions[0]:
-    print(sessions)
-    ccl=list(contentlist.where("category", "==", "category1").stream())
-    return render_template("mainpage.html", sessions=sessions,ccl=ccl)
+    print(session['userid'])
+    ccl=list(contentlist.where("category", "==", "category1").where("is_visible","==",True).stream())
+    return render_template("mainpage.html",ccl=ccl)
     # else:
     #     return redirect(url_for('login'))
 
@@ -81,16 +80,16 @@ def mainpage2():
     sessions = request.args.get('sessions')
     # if sessions[0]:
     print(sessions)
-    ccl=list(contentlist.where("category", "==", "category2").stream())
-    return render_template("mainpage.html", sessions=sessions,ccl=ccl)
+    ccl=list(contentlist.where("category", "==", "category2").where("is_visible","==",True).stream())
+    return render_template("mainpage.html",ccl=ccl)
 
 @app.route("/mainpage3", methods=['GET', 'POST'])
 def mainpage3():
     sessions = request.args.get('sessions')
     # if sessions[0]:
     print(sessions)
-    ccl=list(contentlist.where("category", "==", "category3").stream())
-    return render_template("mainpage.html", sessions=sessions,ccl=ccl)
+    ccl=list(contentlist.where("category", "==", "category3").where("is_visible","==",True).stream())
+    return render_template("mainpage.html",ccl=ccl)
 
 
 @app.route("/logout")
