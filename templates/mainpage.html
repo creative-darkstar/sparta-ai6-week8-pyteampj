@@ -21,7 +21,7 @@
                 </a>
 
                 <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                    <li><a href="#" class="nav-link px-2 link-secondary">1번카테고리</a></li>
+                    <li><a href="/mainpage" class="nav-link px-2 link-secondary">1번카테고리</a></li>
                     <li><a href="#" class="nav-link px-2 link-body-emphasis">2번카테고리</a></li>
                     <li><a href="#" class="nav-link px-2 link-body-emphasis">3번카테고리</a></li>
                 </ul>
@@ -58,24 +58,15 @@
                 <th scope="col">날짜</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="postlist">
+            {% for doc in ctl %}
             <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
+                <th scope="row">{{doc.id}}</th>
+                <td>{{doc.to_dict()['title']}}</td>
+                <td>{{doc.to_dict()['userinfo_id']}}</td>
+                <td>{{doc.to_dict()['update_date']}}</td>
             </tr>
-            <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-            </tr>
-            <tr>
-                <th scope="row">3</th>
-                <td colspan="2">Larry the Bird</td>
-                <td>@twitter</td>
-            </tr>
+            {% endfor %}
         </tbody>
     </table>
 

@@ -12,16 +12,12 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 contentlist = db.collection('ContentInfo')
 userlist=db.collection('UserInfo')
-categroy=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['category']
-title=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['title']
-content=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['content']
-is_secret=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['is_secret']
-update_date=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['update_date']
-userinfo_id=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['userinfo_id']
-nickname=userlist.document('test1').get().to_dict()['nickname']
-test=contentlist.stream()
-for doc in test:
-    print(f'{doc.id}=>{doc.to_dict()}')
+
+test=list(contentlist.stream())
+print(test[0].to_dict(),test[0].id)
+# for doc in test:
+#     print(f'{doc.id}=>{doc.to_dict()}')
+
 
 # @app.route("/")
 # def mainpage():

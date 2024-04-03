@@ -11,18 +11,22 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 UserInfo = db.collection('UserInfo')
 contentlist = db.collection('ContentInfo')
-userlist=db.collection('UserInfo')
+userlist = db.collection('UserInfo')
 
 app = Flask(__name__)
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
 
-#기본페이지->login페이지
+# 기본페이지->login페이지
+
+
 @app.route("/")
 def home():
     return redirect(url_for('login'))
 
-#로그인페이지->회원가입, 메인페이지
+# 로그인페이지->회원가입, 메인페이지
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -33,7 +37,7 @@ def login():
                 session["logged_in"] = True
                 session['userid'] = userid
                 print(session)
-                return redirect(url_for('mainpage',sessions=session))
+                return redirect(url_for('mainpage', sessions=session))
             else:
                 print('아이디와 비밀번호를 정확히 입력해 주세요')
                 return render_template('login.html')
@@ -63,26 +67,19 @@ def register():
         return render_template('register.html')
 
 
-@app.route("/mainpage", methods=['GET'])
+@app.route("/mainpage", methods=['GET', 'POST'])
 def mainpage():
-    sessions=request.args.get('sessions')
-    categroy=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['category']
-    title=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['title']
-    content=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['content']
-    is_secret=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['is_secret']
-    update_date=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['update_date']
-    userinfo_id=contentlist.document('f15ruAbukPXoMihgbfx8').get().to_dict()['userinfo_id']
-    nickname=userlist.document('test1').get().to_dict()['nickname']
-    data={
-        'category':categroy,
-        'title':title,
-        'content':content,
-        'is_secret':is_secret,
-        'update_date':update_date,
-        'userinfo_id':userinfo_id,
-        'nickname':nickname,
-    }
-    return render_template("mainpage.html",data=data)
+    sessions = request.args.get('sessions')
+    # if sessions[0]:
+    print(sessions)
+    ctl = list(contentlist.stream())
+    usl = userlist.stream()
+    print(ctl)
+
+    return render_template("mainpage.html", sessions=sessions, ctl=ctl,usl=usl)
+    # else:
+    #     return redirect(url_for('login'))
+
 
 @app.route("/logout")
 def logout():
