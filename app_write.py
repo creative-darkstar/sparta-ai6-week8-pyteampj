@@ -55,12 +55,16 @@ def get_posts():
             'post_id': post.id,
             'title': post_data['title'],
             'category': post_data['category'],
+
             'author': user_info['username'],
             'create_date': post_data['create_date'],
             'images': post_data.get('images', []),
             'is_secret': post_data['is_secret'],
             'update_date': post_data['update_date'],
-            'userinfo_id': post_data['userinfo_id']
+            'userinfo_id': post_data['userinfo_id'],
+
+            'content': post_data['content']
+            # 게시글 내용 불러오기 테스트
 
             # 'post_id': post.id,
             # 'title': post_data['title'],
