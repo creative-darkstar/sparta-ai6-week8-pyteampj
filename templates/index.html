@@ -48,12 +48,16 @@
                         <p>{{ post.content }}</p>
                     </div>
                     <div class="btn-container mt-3">
-                        <form action="/delete/{{ post.post_id }}" method="post" style="display: inline;">
+                        <!-- <form action="/delete/{{ post.post_id }}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-danger mr-2">게시물 삭제</button>
+                        </form> -->
+                        <form action="/delete/{{ post.post_id }}" method="get" style="display: inline;">
                             <button type="submit" class="btn btn-danger mr-2">게시물 삭제</button>
                         </form>
                         <form action="/edit/{{ post.post_id }}" method="get" style="display: inline;">
                             <button type="submit" class="btn btn-primary">글 수정</button>
                         </form>
+                        <!--  get 을 쓰면 none값이 input되는 경우가 있기 때문에 post로 권장. 일단 이건 더 찾아보기.  -->
                     </div>
                 </div>
                 {% endfor %}
