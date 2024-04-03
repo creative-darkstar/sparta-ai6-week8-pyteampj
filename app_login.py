@@ -11,7 +11,6 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 UserInfo = db.collection('UserInfo')
 contentlist = db.collection('ContentInfo')
-userlist = db.collection('UserInfo')
 
 app = Flask(__name__)
 app.secret_key = 'super secret key'
@@ -72,13 +71,26 @@ def mainpage():
     sessions = request.args.get('sessions')
     # if sessions[0]:
     print(sessions)
-    ctl = list(contentlist.stream())
-    usl = userlist.stream()
-    print(ctl)
-
-    return render_template("mainpage.html", sessions=sessions, ctl=ctl,usl=usl)
+    ccl=list(contentlist.where("category", "==", "category1").stream())
+    return render_template("mainpage.html", sessions=sessions,ccl=ccl)
     # else:
     #     return redirect(url_for('login'))
+
+@app.route("/mainpage2", methods=['GET', 'POST'])
+def mainpage2():
+    sessions = request.args.get('sessions')
+    # if sessions[0]:
+    print(sessions)
+    ccl=list(contentlist.where("category", "==", "category2").stream())
+    return render_template("mainpage.html", sessions=sessions,ccl=ccl)
+
+@app.route("/mainpage3", methods=['GET', 'POST'])
+def mainpage3():
+    sessions = request.args.get('sessions')
+    # if sessions[0]:
+    print(sessions)
+    ccl=list(contentlist.where("category", "==", "category3").stream())
+    return render_template("mainpage.html", sessions=sessions,ccl=ccl)
 
 
 @app.route("/logout")
