@@ -27,7 +27,6 @@ def get_posts():
     #  timestamp -> 통일하고 contentinfo에다가도 쏘기. format 통일
     # date = datetime.now().strftime("%Y-%m-%d %I:%M:%S.%f")
     posts = posts_ref.stream()
-
     return [post.to_dict() for post in posts]
 
 # 게시글 작성하기

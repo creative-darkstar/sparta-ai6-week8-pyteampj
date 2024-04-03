@@ -12,10 +12,20 @@
     <ul>
         {% for post in posts %}
         <li>
-            <a href="/edit/{{ post.post_id }}">{{ post.title }}</a>
+            {{ post.title }}</a><br>
+            - 작성자 : {{ post.author }}<br>
+            - 작성 시간 : {{ post.timestamp }}<br>
 
             <!-- <a href="/edit/{{ loop.index0 }}">{{ post.title }}</a> -->
-            - {{ post.category }}
+            <!-- 임의로 페이지를 띄우기 위해 loop.index0 -->
+
+            - {{ post.category }}<br>
+            <a href="/delete/{{post.post_id}}">[게시물 삭제]</a>
+            <!-- 삭제 추가. Test 필요.  -->
+            <!-- [게시물 삭제] : 삭제 버튼 추가.  -->
+            <a href="/edit/{{ post.post_id }}">[글 수정]</a>
+            <!-- 수정 버튼 추가 -->
+
         </li>
         {% endfor %}
     </ul>
