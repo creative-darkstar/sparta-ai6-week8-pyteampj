@@ -16,14 +16,14 @@
     <header class="p-3 mb-3 border-bottom">
         <div class="container">
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
+                <a href="/mainpage" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
                     logo
                 </a>
 
                 <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                    <li><a href="/mainpage" class="nav-link px-2 link-secondary">1번카테고리</a></li>
+                    <li><a href="/mainpage" class="nav-link px-2 link-body-emphasis hover">1번카테고리</a></li>
                     <li><a href="/mainpage2" class="nav-link px-2 link-body-emphasis hover">2번카테고리</a></li>
-                    <li><a href="/mainpage3" class="nav-link px-2 link-body-emphasis">3번카테고리</a></li>
+                    <li><a href="/mainpage3" class="nav-link px-2 link-body-emphasis hover">3번카테고리</a></li>
                 </ul>
 
                 <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
@@ -35,13 +35,7 @@
                         data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
                     </a>
-                    <ul class="dropdown-menu text-small"><!-- style ="" -->
-                        <li><a class="dropdown-item" href="#">New project...</a></li>
-                        <li><a class="dropdown-item" href="#">Settings</a></li>
-                        <li><a class="dropdown-item" href="#">Profile</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
+                    <ul class="dropdown-menu text-small">
                         <li><a class="dropdown-item" href="/logout">Logout</a></li>
                     </ul>
                 </div>
@@ -49,50 +43,55 @@
         </div>
     </header>
 
-    <table class="table">
-        <thead>
+    <div class="container">
+        <table class="table">
+            <thead>
             <tr>
                 <th scope="col">번호</th>
                 <th scope="col">글제목</th>
                 <th scope="col">작성자</th>
                 <th scope="col">날짜</th>
             </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody>
             {% for doc in ccl %}
             <tr>
                 <th scope="row">{{doc.id}}</th>
-                <td>{{doc.to_dict()['title']}}</td>
-                <td>{{doc.to_dict()['userinfo_id']}}</td>
-                <td>{{doc.to_dict()['update_date']}}</td>
+                <td>
+                    <a href="/view/{{ doc.id }}">{{ doc.to_dict()['title'] }}</a>
+                </td>
+                <td>{{ doc.to_dict()['userinfo_id'] }}</td>
+                <td>{{ doc.to_dict()['update_date'] }}</td>
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
 
-    <nav aria-label="Page navigation example">
-        <ul class="pagination">
-            <li class="page-item">
-                <a class="page-link" href="#" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-                <a class="page-link" href="#" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
 
-    <button type="button">글쓰기</button>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a class="btn btn-secondary" href="/write" role="button">글쓰기</a>
+        </div>
+    </div>
 
-    <footer>
-
-    </footer>
     <!-- 부트스르랩 사용 -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
