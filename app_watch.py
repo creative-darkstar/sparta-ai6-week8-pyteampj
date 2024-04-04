@@ -6,7 +6,7 @@ from db_handler_watch import Database
 0. Flask : 웹서버를 시작할 수 있는 기능. app이라는 이름으로 플라스크를 시작한다
 1. render_template : html파일을 가져와서 보여준다
 """
-from flask import Flask, session, render_template, request, redirect, url_for, make_response
+from flask import Flask, session, render_template, request, redirect, url_for, jsonify
 # Flask app 세팅
 app = Flask(__name__)
 app.secret_key = "1234"
@@ -20,23 +20,37 @@ def invalid():
 @app.route("/view/<contentinfo_id>/", methods=["GET", "POST"])
 def view(contentinfo_id):
     # 페이지 이동 시 or 새로고침 시 cursor 삭제
-    if request.method == 'GET':
-        if "cm_cursor" in session:
-            session.pop("cm_cursor", None)
-    # if request.method == 'POST':
-    #     if "userinfo_id" in session:
-    #         comment = request.form["comment"]
-    #         cm_update_date = datetime.now().strftime("%Y-%m-%d %I:%M:%S.%f")
-    #
-    #         # 댓글 생성
-    #         comment_data = {
-    #             'contentinfo_id': contentinfo_id,
-    #             'userinfo_id': session["userinfo_id"],
-    #             'comment': comment,
-    #             'cm_update_date': cm_update_date,
-    #         }
-    #         Database.comment_insert(comment_data)
-    #         return redirect(url_for("view"))
+    if request.method == "GET" and "cm_cursor" in session:
+        session.pop("cm_cursor", None)
+
+    # 버튼
+    if request.method == "POST":
+        data = request.get_json()
+
+        # create comment (ajax)
+        if "comment" in data.keys():
+            input_comment = data["comment"]
+            print(input_comment)
+            Database.comment_insert(
+                data={
+                    "contentinfo_id": contentinfo_id,
+                    # "userinfo_id": session["userinfo_id"],
+                    "userinfo_id": "test3",
+                    "comment": input_comment,
+                }
+            )
+            return input_comment
+
+        # delete comment (ajax)
+        elif "delete_item" in data.keys():
+            target_id = str(data["delete_item"])
+            Database.comment_edit(
+                data={
+                    "is_visible": False
+                },
+                doc_id=target_id
+            )
+            return target_id
 
     # 게시글 데이터 불러오기
     content = Database.content_select(contentinfo_id).to_dict()
@@ -69,15 +83,14 @@ def view(contentinfo_id):
         session["cm_cursor"] = last
 
     # 추가 댓글 데이터 불러오기
-    if request.method == "POST":
-        if "cm_cursor" in session:
-            more_comments, last = Database.comment_select_more(contentinfo_id, session["cm_cursor"])
-            print(last)
-            comments = chain(comments, more_comments)
-            if last is not None:
-                session["cm_cursor"] = last
-            else:
-                session.pop("cm_cursor", None)
+    if request.method == "POST" and "cm_cursor" in session:
+        more_comments, last = Database.comment_select_more(contentinfo_id, session["cm_cursor"])
+        print(last)
+        comments = chain(comments, more_comments)
+        if last is not None:
+            session["cm_cursor"] = last
+        else:
+            session.pop("cm_cursor", None)
 
     # 추가 댓글 여부에 따른 패키지에 저장할 bool 값
     is_more_comment = True if "cm_cursor" in session else False
@@ -106,6 +119,7 @@ def view(contentinfo_id):
         #     is_comment_owner = False
         is_comment_owner = True if row["userinfo_id"] == "test3" else False
         row["is_comment_owner"] = is_comment_owner
+        row["row_id"] = item.id
         package["comments"].append(row)
     # print(package)
     return render_template('view.html', data=package)

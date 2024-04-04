@@ -53,20 +53,33 @@ class Database:
         return data.stream(), last
 
     @classmethod
-    def comment_insert(cls, data):
+    def comment_insert(cls, data: dict):
         table = cls.__connection().collection("CommentInfo")
         num = int(table.count().get()[0][0].value) + 1
         curr_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         table.add(
             document_data={
-                "contentinfo_id": "1",
-                "userinfo_id": "test3",
-                "comment": "comment_test_2024-04-03",
+                "contentinfo_id": data["contentinfo_id"],
+                "userinfo_id": data["userinfo_id"],
+                "comment": data["comment"],
                 "is_visible": True,
                 "cm_update_date": curr_time
             },
             document_id=str(num)
         )
+
+    @classmethod
+    def comment_edit(cls, data: dict, doc_id: str):
+        table = cls.__connection().collection("CommentInfo")
+        curr_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        target = table.document(doc_id)
+        if "is_visible" in data.keys():
+            target.update({
+                "is_visible": data["is_visible"]
+            })
+        else:
+            pass
 
     @classmethod
     def __connection(cls, retry_count=5):
