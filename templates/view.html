@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
@@ -62,14 +63,19 @@
             </thead>
             <tbody id="comments">
                 {% for item in data.comments %}
-                <tr>
+                <tr id="cm_row_{{ item.row_id }}">
                     <td>{{ item.userinfo_id }}</td>
-                    <td>{{ item.comment }}</td>
+                    <td id="cm_row_{{ item.row_id }}_comment">{{ item.comment }}</td>
                     {% if item.is_comment_owner is true %}
-                    <td>{{ item.cm_update_date }}</td>
+                    <td id="cm_row_{{ item.row_id }}_udate">{{ item.cm_update_date }}</td>
                     <td>
-                        <button class="btn btn-secondary pull-right" type="button" onclick="getUserName()">Edit</button>
-                        <button class="btn btn-danger pull-right" type="button" onclick="getUserName()">Delete</button>
+<!--                        <div class="wrap">-->
+<!--                            <button class="btn btn-secondary pull-right" type="button">Edit</button>-->
+<!--                        </div>-->
+                        <button class="btn btn-secondary pull-right" type="button"
+                                onclick="isEdit({{ item.row_id }})">Edit</button>
+                        <button class="btn btn-danger pull-right" type="button"
+                                onclick="deleteConfirm({{ item.row_id }})">Delete</button>
                     </td>
                     {% else %}
                     <td colspan="2">{{ item.cm_update_date }}</td>
@@ -77,6 +83,19 @@
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <td>{{ data.content.userinfo_id }}</td>
+                    <td colspan="3">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="inputComment" name="inputComment">
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-danger" onclick="inputConfirm()">submit</button>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
         </table>
         {% if data.is_more_comment is true %}
         <form method="post">
@@ -93,6 +112,121 @@
     <script>
         history.replaceState({}, null, location.pathname);
     </script>
+    <script>
+        function isEdit(rowId) {
+            console.log("수정 버튼 누름");
+            var cm_row_tag = document.getElementById('cm_row_' + rowId)
+            const editDiv = document.createElement('div');
+            const editText = document.createTextNode('안녕하세요');
+        }
+
+        function deleteConfirm(rowId) {
+            if (window.confirm("해당 댓글을 삭제하시겠습니까?")) {
+                var postData = {
+                    'delete_item': rowId
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ url_for("view", contentinfo_id=data.contentinfo_id) }}',
+                    data: JSON.stringify(postData),
+                    dataType : 'JSON',
+                    contentType: "application/json",
+                    success: function(data) {
+                        var cm_tag = document.getElementById('cm_row_' + data)
+                        cm_tag.remove()
+                    }
+                })
+                console.log("확인. 삭제 완료");
+            } else {
+                console.log("취소. 변화 없음");
+            }
+        }
+
+        function inputConfirm() {
+            if (window.confirm("해당 댓글을 게시하시겠습니까?")) {
+                var cm = document.getElementById('inputComment').value
+                if (!cm) {
+                    window.alert("빈 댓글은 게시할 수 없습니다. 다시 확인해주세요.");
+                } else {
+                    var postdata = {
+                        'comment': cm
+                    }
+                    $.ajax({
+                        type: 'POST',
+                        url: '{{ url_for('view', contentinfo_id=data.contentinfo_id) }}',
+                        data: JSON.stringify(postdata),
+                        dataType : 'JSON',
+                        contentType: "application/json",
+                    })
+                    console.log("확인. 게시 완료");
+                }
+            } else {
+                console.log("취소. 게시 취소");
+            }
+        }
+    </script>
+<!--    <script>-->
+<!--        var editBtn = document.querySelectorAll('.btn_edit');-->
+<!--        var deleteBtn = document.querySelectorAll('.btn_delete');-->
+<!--        // var editBtnPopClose = document.querySelectorAll('.edit_pop_wrap .btn_close');-->
+<!--        var editBtnPopConfirm = document.querySelectorAll('.edit_pop_wrap .btn_confirm');-->
+<!--        var deleteBtnPopClose = document.querySelectorAll('.delete_pop_wrap .btn_close');-->
+<!--        var deleteBtnPopConfirm = document.querySelectorAll('.delete_pop_wrap .btn_confirm');-->
+<!--        var editPopID;-->
+<!--        var deletePopID;-->
+<!--        var isEditPop = false;-->
+<!--        var isDeletePop = false;-->
+
+<!--        // 수정 팝업 열기-->
+<!--        for(var e_i = 0; e_i < editBtn.length; e_i++){-->
+<!--            editBtn[e_i].addEventListener('click', function(){-->
+<!--                editPopID = this.getAttribute('name');-->
+<!--                if (!isEditPop) {-->
+<!--                    document.querySelector(editPopID).style.display = 'block';-->
+<!--                } else {-->
+<!--                    document.querySelector(editPopID).style.display = 'none';-->
+<!--                }-->
+<!--            });-->
+<!--        }-->
+
+<!--        /*-->
+<!--        // 수정 팝업 닫기-->
+<!--        for(var e_j = 0; e_j < editBtnPopClose.length; e_j++){-->
+<!--            editBtnPopClose[e_j].addEventListener('click', function(){-->
+<!--                this.parentNode.parentNode.style.display = 'none';-->
+<!--            });-->
+<!--        }-->
+<!--        */-->
+
+<!--        // 수정 팝업 확인-->
+<!--        for(var e_k = 0; e_k < editBtnPopConfirm.length; e_k++){-->
+<!--            editBtnPopConfirm[e_k].addEventListener('click', function(){-->
+<!--                this.parentNode.parentNode.style.display = 'none';-->
+<!--            });-->
+<!--        }-->
+
+<!--        // 삭제 팝업 열기-->
+<!--        for(var d_i = 0; d_i < editBtn.length; d_i++){-->
+<!--            deleteBtn[d_i].addEventListener('click', function(){-->
+<!--                deletePopID = this.getAttribute('href');-->
+<!--                document.querySelector(deletePopID).style.display = 'block';-->
+<!--            });-->
+<!--        }-->
+
+<!--        // 삭제 팝업 닫기-->
+<!--        for(var d_j = 0; d_j < deleteBtnPopClose.length; d_j++){-->
+<!--            deleteBtnPopClose[d_j].addEventListener('click', function(){-->
+<!--                this.parentNode.parentNode.style.display = 'none';-->
+<!--            });-->
+<!--        }-->
+
+<!--        // 삭제 팝업 확인-->
+<!--        for(var d_k = 0; d_k < deleteBtnPopConfirm.length; d_k++){-->
+<!--            deleteBtnPopConfirm[d_k].addEventListener('click', function(){-->
+<!--                this.parentNode.parentNode.style.display = 'none';-->
+<!--            });-->
+<!--        }-->
+<!--    </script>-->
 </body>
 
 </html>
