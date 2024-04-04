@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈페이지</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .post {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .post-info {
+            font-size: 16px;
+        }
+
+        .content-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-container {
+            text-align: center;
+        }
+
+        .image-container {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-8">
+                <h1 class="text-center mb-4">게시판</h1>
+                <a href="/write" class="btn btn-success btn-block mb-4">글 작성</a>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                {% for post in posts %}
+                <div class="post bg-light">
+                    <h4>{{ post.title }}</h4>
+                    <p class="post-info">작성자: {{ post.userinfo_id }} | 작성 시간: {{ post.create_date }} | 카테고리: {{
+                        post.category }} | 수정 시간: {{ post.update_date }}</p>
+                    <div class="content-box">
+                        <p>{{ post.content }}</p>
+                    </div>
+                    <div class="image-container">
+                        {% if post.images %}
+                        <h5>Images:</h5>
+                        <div class="row">
+                            {% for image_url in post.images %}
+                            <div class="col-md-3">
+                                <img src="{{ image_url }}" class="img-fluid" alt="Image">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="btn-container mt-3">
+                        <form action="/delete/{{ post.post_id }}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-danger mr-2">게시물 삭제</button>
+                        </form>
+                        <form action="/edit/{{ post.post_id }}" method="get" style="display: inline;">
+                            <button type="submit" class="btn btn-primary">글 수정</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 이미지 업로드 관련 스크립트 추가 -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-storage.js"></script>
+    <script>
+        // Firebase 프로젝트 구성
+        const firebaseConfig = {
+            // Firebase 프로젝트 구성 정보
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // 이미지 업로드 함수
+        function uploadImage() {
+            var fileInput = document.getElementById('fileInput'); // 파일 입력란
+            var storageRef = firebase.storage().ref('images/' + fileInput.files[0].name);
+            var task = storageRef.put(fileInput.files[0]);
+
+            // 이미지 업로드 상태 추적
+            task.on('state_changed',
+                function progress(snapshot) {
+                    var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Upload is ' + percentage + '% done');
+                },
+                function error(err) {
+                    console.error('Error uploading image:', err);
+                },
+                function complete() {
+                    // 업로드 완료 후 이미지 다운로드 URL 가져오기
+                    task.snapshot.ref.getDownloadURL().then(function (downloadURL) {
+                        console.log('File available at', downloadURL);
+                        // 여기에서는 이미지를 업로드한 후 어떻게 처리할지를 정의할 수 있습니다.
+                        // 이미지 URL을 서버에 전달하거나, 화면에 추가하는 등의 작업을 수행할 수 있습니다.
+                    });
+                }
+            );
+        }
+    </script>
+</body>
+
+</html>

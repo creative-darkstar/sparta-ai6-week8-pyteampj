@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 수정</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* CSS 스타일은 생략 */
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>게시글 수정</h1>
+        <form action="{{ url_for('edit', post_id=post_id) }}" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" class="form-control" value="{{ post.title }}">
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="category" name="category" class="form-control">
+                    <option value="category1" {% if post.category=='category1' %} selected {% endif %}>Category 1
+                    </option>
+                    <option value="category2" {% if post.category=='category2' %} selected {% endif %}>Category 2
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="content">Content:</label>
+                <textarea id="content" name="content" class="form-control" rows="6">{{ post['content'] }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="images">Images:</label>
+                <input type="file" class="form-control" id="images" name="images[]" multiple accept="image/*">
+            </div>
+            <input type="submit" value="Submit" class="btn btn-primary">
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-storage.js"></script>
+    <script>
+        const firebaseConfig = {
+            // Firebase 프로젝트 구성 정보
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        function uploadImage() {
+            var fileInput = document.getElementById('images'); // 파일 입력란
+            var storageRef = firebase.storage().ref('images/' + fileInput.files[0].name);
+            var task = storageRef.put(fileInput.files[0]);
+
+            task.on('state_changed',
+                function progress(snapshot) {
+                    var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Upload is ' + percentage + '% done');
+                },
+                function error(err) {
+                    console.error('Error uploading image:', err);
+                },
+                function complete() {
+                    task.snapshot.ref.getDownloadURL().then(function (downloadURL) {
+                        console.log('File available at', downloadURL);
+                        // 이미지 다운로드 URL을 서버에 전달하거나 필요한 곳에 적용하는 작업 수행
+                    });
+                }
+            );
+        }
+    </script>
+</body>
+
+</html>
