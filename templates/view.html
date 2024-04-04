@@ -2,6 +2,9 @@
 <html lang="en">
 
 <head>
+    <style>
+        .mainTitle {color: black; text-decoration: none; font-weight: bold;}
+    </style>
     <script src="https://code.jquery.com/jquery-latest.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,12 +14,36 @@
 </head>
 
 <body>
-    <h1 style="text-align: center;">Hello, World!</h1>
+    <header class="p-3 mb-3 border-bottom">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-between">
+                <div></div>
+                <div>
+                    <a class="mainTitle" href="/mainpage">
+                        <h1 style="text-align: center; font-weight: bold">Hello, World!</h1>
+                    </a>
+                </div>
+                <div class="dropdown text-end">
+                    <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                    </a>
+                    <ul class="dropdown-menu text-small">
+                        <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
     <div class="container">
-        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
             <div class="btn btn-outline-primary btn-sm disabled"> {{ data.content.category }} </div>
             {% if data.is_content_owner is true %}
-            <a class="btn btn-secondary btn-sm" href="/edit/{{ data.contentinfo_id }}" role="button">수정 / 삭제</a>
+            <div>
+                <a class="btn btn-secondary btn-sm" href="/edit/{{ data.contentinfo_id }}" role="button">수정</a>
+                <a class="btn btn-danger btn-sm" href="/delete/{{ data.contentinfo_id }}" role="button">삭제</a>
+            </div>
             {% endif %}
         </div>
         <p></p>
@@ -40,11 +67,9 @@
 				</thead>
 			</table>
             {% for item in data.content.images %}
-            <p>
-                <img src="{{ item }}" alt="">
-            </p>
+            <p class="ms-3"><img src="{{ item }}" alt=""></p>
             {% endfor %}
-            <p>{{ data.content.content }}</p>
+            <p class="ms-3">{{ data.content.content }}</p>
 		</div>
         <hr>
 	</div>
@@ -85,7 +110,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td>{{ data.content.userinfo_id }}</td>
+                    <td>{{ data.current_user_id }}</td>
                     <td colspan="3">
                         <div class="mb-3">
                             <input type="text" class="form-control" id="inputComment" name="inputComment">
