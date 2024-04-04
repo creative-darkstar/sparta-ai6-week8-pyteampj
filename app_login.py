@@ -1,7 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-from flask import Flask, request, render_template, session, url_for, redirect
+from flask import Flask, request, render_template, session, url_for, redirect, jsonify
 from login import check_login_data, check_login
 from register import check_id, check_signup_data, check_password, set_user_info
 
@@ -13,7 +13,7 @@ UserInfo = db.collection('UserInfo')
 contentlist = db.collection('ContentInfo')
 
 app = Flask(__name__)
-app.secret_key = 'super secret key'
+app.secret_key = 'super secret key'  # 나중에 랜덤 값으로 넣기
 app.config['SESSION_TYPE'] = 'filesystem'
 
 # 기본페이지->login페이지
@@ -29,20 +29,24 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        userid = request.form['userid']
-        password = request.form['password']
+        data = request.get_json()
+        print(data)
+        # userid = request.form['userid']
+        # password = request.form['password']
+        userid = data['userid']
+        password = data['password']
         if check_login_data(userid, password):
             if check_login(UserInfo, userid, password):
                 session["logged_in"] = True
                 session['userid'] = userid
                 print(session)
-                return redirect(url_for('mainpage'))
+                return jsonify(result=True, session=session, redirectUrl='mainpage')  # redirect(url_for('mainpage'))
             else:
-                print('아이디와 비밀번호를 정확히 입력해 주세요')
-                return render_template('login.html')
+                print('아이디와 비밀번호를 정확히 입력해 주세요2')
+                return jsonify(result=False)  # render_template('login.html', result = 'success', data=data)
         else:
-            print('아이디와 비밀번호를 정확히 입력해 주세요')
-            return render_template('login.html')
+            print('아이디와 비밀번호를 정확히 입력해 주세요1')
+            return jsonify(result=False)  # render_template('login.html', result = 'success', data=data)
     else:
         return render_template('login.html')
 
