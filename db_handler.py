@@ -3,8 +3,7 @@ from datetime import datetime
 
 # Firebase 관련 패키지
 import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+from firebase_admin import credentials, firestore
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 cred = credentials.Certificate('authentication/firebase_auth.json')

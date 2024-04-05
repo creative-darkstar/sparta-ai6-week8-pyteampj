@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from itertools import chain
-from db_handler import Database
+from db_handler import Database, firestore
 from flask import Flask, request, render_template, session, url_for, redirect
 from login import check_login_data, check_login
 from register import check_id, check_signup_data, check_password, set_user_info
@@ -9,6 +9,7 @@ from google.cloud.firestore_v1.base_query import FieldFilter
 app = Flask(__name__)
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
 
 # app_login.py
@@ -72,35 +73,47 @@ def register():
 
 @app.route("/mainpage1", methods=['GET', 'POST'])
 def mainpage1():
+    # 로그인 세션 만료 시 or 로그인 하지 않았는데 페이지 접속할 시
+    if "userid" not in session.keys():
+        return redirect(url_for("invalid"))
     session_id = session['userid']
     content_info = Database.get_contentinfo()
-    ccl = list(content_info.where(filter=FieldFilter("category", "==", "1")).where(filter=FieldFilter("is_visible", "==", True)).stream())
+    ccl = list(content_info.where(filter=FieldFilter("category", "==", "1")).where(filter=FieldFilter("is_visible", "==", True)).order_by("create_date", direction=firestore.Query.DESCENDING).stream())
     return render_template("mainpage1.html", ccl=ccl, session_id=session_id)
 
 
 @app.route("/mainpage2", methods=['GET', 'POST'])
 def mainpage2():
+    # 로그인 세션 만료 시 or 로그인 하지 않았는데 페이지 접속할 시
+    if "userid" not in session.keys():
+        return redirect(url_for("invalid"))
     session_id = session['userid']
     content_info = Database.get_contentinfo()
-    ccl = list(content_info.where(filter=FieldFilter("category", "==", "2")).where(filter=FieldFilter("is_visible", "==", True)).stream())
+    ccl = list(content_info.where(filter=FieldFilter("category", "==", "2")).where(filter=FieldFilter("is_visible", "==", True)).order_by("create_date", direction=firestore.Query.DESCENDING).stream())
     return render_template("mainpage1.html", ccl=ccl, session_id=session_id)
 
 
 @app.route("/mainpage3", methods=['GET', 'POST'])
 def mainpage3():
+    # 로그인 세션 만료 시 or 로그인 하지 않았는데 페이지 접속할 시
+    if "userid" not in session.keys():
+        return redirect(url_for("invalid"))
     session_id = session['userid']
     content_info = Database.get_contentinfo()
-    ccl = list(content_info.where(filter=FieldFilter("category", "==", "3")).where(filter=FieldFilter("is_visible", "==", True)).stream())
+    ccl = list(content_info.where(filter=FieldFilter("category", "==", "3")).where(filter=FieldFilter("is_visible", "==", True)).order_by("create_date", direction=firestore.Query.DESCENDING).stream())
     return render_template("mainpage1.html", ccl=ccl, session_id=session_id)
 
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
+    # 로그인 세션 만료 시 or 로그인 하지 않았는데 페이지 접속할 시
+    if "userid" not in session.keys():
+        return redirect(url_for("invalid"))
     session_id = session['userid']
     searching=request.form['search_id']
     print(searching)
     content_info = Database.get_contentinfo()
-    ccl = list(content_info.where(filter=FieldFilter("userinfo_id", "==", searching)).where(filter=FieldFilter("is_visible", "==", True)).stream())
+    ccl = list(content_info.where(filter=FieldFilter("userinfo_id", "==", searching)).where(filter=FieldFilter("is_visible", "==", True)).order_by("create_date", direction=firestore.Query.DESCENDING).stream())
     return render_template('search.html',ccl=ccl,session_id=session_id)
 
 
@@ -119,6 +132,9 @@ def logout():
 # 게시글 작성하기 24.04.03
 @app.route('/write', methods=['GET', 'POST'])
 def write():
+    # 로그인 세션 만료 시 or 로그인 하지 않았는데 페이지 접속할 시
+    if "userid" not in session.keys():
+        return redirect(url_for("invalid"))
     if request.method == 'POST':
         title = request.form['title']
         category = request.form['category']
@@ -155,6 +171,9 @@ def write():
 @app.route('/edit/<post_id>', methods=['GET', 'POST'])
 # post_id -> content_info 수정
 def edit(post_id):
+    # 로그인 세션 만료 시 or 로그인 하지 않았는데 페이지 접속할 시
+    if "userid" not in session.keys():
+        return redirect(url_for("invalid"))
     # print(f"{post_id=}")
     content_info = Database.get_contentinfo()
     post_ref = content_info.document(post_id)
@@ -184,6 +203,9 @@ def edit(post_id):
 @app.route('/delete/<post_id>')
 # post_id에 대해서도 다시 Crosscheck 필요
 def delete(post_id):
+    # 로그인 세션 만료 시 or 로그인 하지 않았는데 페이지 접속할 시
+    if "userid" not in session.keys():
+        return redirect(url_for("invalid"))
     content_info = Database.get_contentinfo()
     post_ref = content_info.document(post_id)
     post_ref.update({'is_visible': False})
@@ -196,6 +218,10 @@ def delete(post_id):
 # ----------------------------------------------------------
 @app.route("/view/<contentinfo_id>/", methods=["GET", "POST"])
 def view(contentinfo_id):
+    # 로그인 세션 만료 시 or 로그인 하지 않았는데 페이지 접속할 시
+    if "userid" not in session.keys():
+        return redirect(url_for("invalid"))
+
     # 페이지 데이터 불러오기
     # 게시글 데이터
     content = Database.content_select(contentinfo_id).to_dict()

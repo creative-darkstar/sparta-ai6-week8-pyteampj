@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>홈페이지 제목_글 수정</title>
+    <title>Spartan Guild</title>
     <!-- 부트스트랩 CDN 추가 -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -78,11 +78,11 @@
             <div class="form-group">
                 <label for="category">Category:</label>
                 <select id="category" name="category" class="form-control">
-                    <option value="1" {% if post.category == '1' %} selected {% endif %}>Category 1
+                    <option value="1" {% if post.category == '1' %} selected {% endif %}>공지 게시판
                     </option>
-                    <option value="2" {% if post.category == '2' %} selected {% endif %}>Category 2
+                    <option value="2" {% if post.category == '2' %} selected {% endif %}>자유 게시판
                     </option>
-                    <option value="3" {% if post.category == '3' %} selected {% endif %}>Category 3
+                    <option value="3" {% if post.category == '3' %} selected {% endif %}>공략 게시판
                     </option>
                 </select>
             </div>
