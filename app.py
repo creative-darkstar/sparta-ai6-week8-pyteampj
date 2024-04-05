@@ -188,18 +188,24 @@ def delete(post_id):
 # ----------------------------------------------------------
 @app.route("/view/<contentinfo_id>/", methods=["GET", "POST"])
 def view(contentinfo_id):
-    # 페이지 이동 시 or 새로고침 시 cursor 삭제
-    if request.method == "GET" and "cm_cursor" in session:
-        session.pop("cm_cursor", None)
+    # 페이지 데이터 불러오기
+    # 게시글 데이터
+    content = Database.content_select(contentinfo_id).to_dict()
+    # 존재하지 않는 게시물이거나 삭제한 게시물인 경우
+    if content is None or content["is_visible"] is False:
+        return redirect(url_for("invalid"))
+
+    # 댓글 데이터
+    # 처음 페이지 로드한 경우에만 comment_cursor에 저장
+    comments, cursor = Database.comment_select(contentinfo_id)
 
     # 버튼
     if request.method == "POST":
         data = request.get_json()
 
         # create comment (ajax)
-        if "comment" in data.keys():
-            input_comment = data["comment"]
-            print(input_comment)
+        if "insert_comment" in data.keys():
+            input_comment = data["insert_comment"]
             Database.comment_insert(
                 data={
                     "contentinfo_id": contentinfo_id,
@@ -208,6 +214,19 @@ def view(contentinfo_id):
                 }
             )
             return input_comment
+
+        # update comment (ajax)
+        elif "update_item" in data.keys() and "update_comment" in data.keys():
+            target_id = str(data["update_item"])
+            new_cmt = data["update_comment"]
+            new_udate = Database.comment_edit(
+                data={
+                    "comment": new_cmt
+                },
+                doc_id=target_id
+            )
+            new_udate = datetime.strptime(new_udate, "%Y-%m-%d %H:%M:%S").strftime("%Y년 %m월 %d일 %p %I시 %M분 %S초")
+            return {"row_id": target_id, "comment": new_cmt, "udate": new_udate}
 
         # delete comment (ajax)
         elif "delete_item" in data.keys():
@@ -220,11 +239,59 @@ def view(contentinfo_id):
             )
             return target_id
 
-    # 게시글 데이터 불러오기
-    content = Database.content_select(contentinfo_id).to_dict()
-    # 존재하지 않는 게시물이거나 삭제한 게시물인 경우
-    if content is None or content["is_visible"] is False:
-        return redirect(url_for("invalid"))
+        # more comments (ajax)
+        elif "cursor" in data.keys():
+            cursor = data["cursor"]
+            more_comments, cursor = Database.comment_select_more(contentinfo_id, cursor)
+
+            # 전송 패키지
+            html_rows = []
+
+            for item in more_comments:
+                row = item.to_dict()
+                # cm_update_time 형식에 맞게 변환
+                t = datetime.strptime(row["cm_update_date"], "%Y-%m-%d %H:%M:%S").strftime("%Y년 %m월 %d일 %p %I시 %M분 %S초")
+                # 현재 접속한 유저가 댓글 작성자인지 확인
+                if "userid" in session:
+                    if session["userid"] == row["userinfo_id"]:
+                        is_comment_owner = True
+                    else:
+                        is_comment_owner = False
+                else:
+                    is_comment_owner = False
+                html_text = f"""<td>{session["userid"]}</td>
+    <td id="cm_row_{item.id}_cmt_view" style="display: run-in">
+        {row["comment"]}
+    </td>
+    <td colspan="2" id="cm_row_{item.id}_cmt_edit" style="display: none">
+        <label for="edit_comment_{item.id}" style="display: none">>댓글 수정</label>
+        <textarea class="form-control" cols="25" rows="1"
+                  id="edit_comment_{item.id}"></textarea>
+    </td>"""
+                if is_comment_owner is True:
+                    html_text += f"""<td id="cm_row_{item.id}_udate" style="display: run-in">{t}</td>
+    <td id="cm_row_{item.id}_btns" style="display: run-in">
+        <button class="btn btn-secondary pull-right" type="button"
+                onclick="isEditClicked('{item.id}')">Edit</button>
+        <button class="btn btn-danger pull-right" type="button"
+                onclick="deleteConfirm('{item.id}')">Delete</button>
+    </td>
+    <td id="cm_row_{item.id}_edit_btn" style="display: none">
+        <button class="btn btn-secondary pull-right" type="button"
+                onclick="isEditClicked('{item.id}')">Cancel</button>
+        <button class="btn btn-primary pull-right" type="button"
+                onclick="isEditConfirmed('{item.id}')">Confirm</button>
+    </td>"""
+                else:
+                    html_text += f"""<td colspan="2">{t}</td>"""
+
+                html_rows.append({"id": item.id, "html_text": html_text})
+
+            package = {
+                "more_comment_cursor": cursor,
+                "comments_html": html_rows
+            }
+            return package
 
     # create_time, update_time 형식에 맞게 변환
     c_t = datetime.strptime(content["create_date"], "%Y-%m-%d %H:%M:%S")
@@ -241,28 +308,6 @@ def view(contentinfo_id):
     else:
         is_content_owner = False
 
-    # 댓글 데이터 불러오기
-    # 처음 페이지 로드한 경우에만 comment_cursor에 저장
-    comments, last = Database.comment_select(contentinfo_id)
-    if last is not None and "cm_cursor" not in session:
-        print("Fisrt visit")
-        print(last)
-        session["cm_cursor"] = last
-
-    # 추가 댓글 데이터 불러오기
-    if request.method == "POST" and "cm_cursor" in session:
-        more_comments, last = Database.comment_select_more(contentinfo_id, session["cm_cursor"])
-        print(last)
-        comments = chain(comments, more_comments)
-        if last is not None:
-            session["cm_cursor"] = last
-        else:
-            session.pop("cm_cursor", None)
-
-    # 추가 댓글 여부에 따른 패키지에 저장할 bool 값
-    is_more_comment = True if "cm_cursor" in session else False
-    print(is_more_comment)
-
     # html 전송 패키지
     if "userid" in session:
         curr_user_id = session["userid"]
@@ -272,7 +317,7 @@ def view(contentinfo_id):
         "contentinfo_id": contentinfo_id,
         "current_user_id": curr_user_id,
         "is_content_owner": is_content_owner,
-        "is_more_comment": is_more_comment,
+        "more_comment_cursor": cursor,
         "content": content,
         "comments": []
     }
