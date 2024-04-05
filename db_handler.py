@@ -39,10 +39,10 @@ class Database:
             filter=FieldFilter("contentinfo_id", "==", contentinfo_id)
         ).where(
             filter=FieldFilter("is_visible", "==", True)
-        ).order_by("cm_update_date").limit(ITEM_PER_PAGE)
+        ).order_by("cm_create_date").limit(ITEM_PER_PAGE)
         docs = data.get()
         if len(docs) == ITEM_PER_PAGE:
-            last = docs[-1].to_dict()["cm_update_date"]
+            last = docs[-1].to_dict()["cm_create_date"]
         else:
             last = None
         return data.stream(), last
@@ -54,10 +54,10 @@ class Database:
             filter=FieldFilter("contentinfo_id", "==", contentinfo_id)
         ).where(
             filter=FieldFilter("is_visible", "==", True)
-        ).order_by("cm_update_date").limit(ITEM_PER_PAGE).start_after({"cm_update_date": cursor})
+        ).order_by("cm_create_date").limit(ITEM_PER_PAGE).start_after({"cm_create_date": cursor})
         docs = data.get()
         if len(docs) == ITEM_PER_PAGE:
-            last = docs[-1].to_dict()["cm_update_date"]
+            last = docs[-1].to_dict()["cm_create_date"]
         else:
             last = None
         return data.stream(), last
@@ -73,6 +73,7 @@ class Database:
                 "userinfo_id": data["userinfo_id"],
                 "comment": data["comment"],
                 "is_visible": True,
+                "cm_create_date": curr_time,
                 "cm_update_date": curr_time
             },
             document_id=str(num)
@@ -86,10 +87,15 @@ class Database:
         target = table.document(doc_id)
         if "is_visible" in data.keys():
             target.update({
-                "is_visible": data["is_visible"]
+                "is_visible": data["is_visible"],
+                "cm_update_date": curr_time
             })
         else:
-            pass
+            target.update({
+                "comment": data["comment"],
+                "cm_update_date": curr_time
+            })
+            return curr_time
 
     @classmethod
     def __connection(cls, retry_count=5):
