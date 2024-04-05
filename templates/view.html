@@ -3,7 +3,11 @@
 
 <head>
     <style>
-        .mainTitle {color: black; text-decoration: none; font-weight: bold;}
+        .mainTitle {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-latest.min.js"></script>
     <meta charset="UTF-8">
@@ -19,14 +23,15 @@
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-between">
                 <div></div>
                 <div>
-                    <a class="mainTitle" href="/mainpage">
+                    <a class="mainTitle" href="/mainpage1">
                         <h1 style="text-align: center; font-weight: bold">Hello, World!</h1>
                     </a>
                 </div>
                 <div class="dropdown text-end">
                     <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                        <!-- <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle"> -->
+                        <span>환영합니다, {{data.current_user_id}}님</span>
                     </a>
                     <ul class="dropdown-menu text-small">
                         <li><a class="dropdown-item" href="/logout">Logout</a></li>
@@ -48,12 +53,13 @@
         </div>
         <p></p>
         <div class="content">
-			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
-			<!-- 게시판에 글 목록들이 홀수와 짝수가 번갈아가며 색상이 변경됨. -->
+            <table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
+                <!-- 게시판에 글 목록들이 홀수와 짝수가 번갈아가며 색상이 변경됨. -->
                 <thead>
-					<tr>
-						<th colspan="2" style="background-color: #ffffff; text-align: center; font-size: 20px">{{ data.content.title }}</th>
-					</tr>
+                    <tr>
+                        <th colspan="2" style="background-color: #ffffff; text-align: center; font-size: 20px">{{
+                            data.content.title }}</th>
+                    </tr>
                     <tr>
                         <th colspan="2" style="background-color: #eeeeee; text-align: left;">
                             작성자: {{ data.content.userinfo_id }}
@@ -64,18 +70,18 @@
                             작성일시: {{ data.content.create_date }} | 수정일시: {{ data.content.update_date }}
                         </td>
                     </tr>
-				</thead>
-			</table>
+                </thead>
+            </table>
             {% for item in data.content.images %}
             <p class="ms-3"><img src="{{ item }}" alt=""></p>
             {% endfor %}
             <p class="ms-3">{{ data.content.content }}</p>
-		</div>
+        </div>
         <hr>
-	</div>
+    </div>
     <div class="container">
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <a href="/write" class="btn btn-outline-dark" style="align: right">글 쓰기</a>
+            <a href="/write" class="btn btn-outline-dark"">글 쓰기</a>
         </div>
         <h2>comments</h2>
         <table class="table">
@@ -159,10 +165,14 @@
                     }
                     $.ajax({
                         type: 'POST',
-                        url: '{{ url_for('view', contentinfo_id=data.contentinfo_id) }}',
-                        data: JSON.stringify(postdata),
-                        dataType : 'JSON',
+                        url: '{{ url_for("view", contentinfo_id=data.contentinfo_id) }}',
+                        data: JSON.stringify(postData),
+                        dataType: 'JSON',
                         contentType: "application/json",
+                        success: function (data) {
+                            var cm_tag = document.getElementById('cm_row_' + data)
+                            cm_tag.remove()
+                        }
                     })
                 }
             }
