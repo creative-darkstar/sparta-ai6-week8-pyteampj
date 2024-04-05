@@ -18,6 +18,16 @@ class Database:
         pass
 
     @classmethod
+    def get_userinfo(cls):
+        db = cls.__connection()
+        return db.collection('UserInfo')
+
+    @classmethod
+    def get_contentinfo(cls):
+        db = cls.__connection()
+        return db.collection('ContentInfo')
+
+    @classmethod
     def content_select(cls, contentinfo_id):
         db = cls.__connection()
         return db.collection("ContentInfo").document(contentinfo_id).get()
@@ -108,7 +118,6 @@ class Database:
 if __name__ == "__main__":
     # Database.comment_insert(data={})
     rows, c = Database.comment_select("1")
-    # rows, c = Database.comment_select_more("1", "2024-04-03 12:20:58")
     for row in rows:
         print(row.id, row.to_dict())
     # print(Database.content_select("f15ruAbukPXoMihgbfx8").to_dict())

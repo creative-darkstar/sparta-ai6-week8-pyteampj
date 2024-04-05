@@ -2,6 +2,14 @@
 <html lang="en">
 
 <head>
+    <style>
+        .mainTitle {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
@@ -10,22 +18,48 @@
 </head>
 
 <body>
-    <h1 style="text-align: center;">Hello, World!</h1>
+    <header class="p-3 mb-3 border-bottom">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-between">
+                <div></div>
+                <div>
+                    <a class="mainTitle" href="/mainpage1">
+                        <h1 style="text-align: center; font-weight: bold">Hello, World!</h1>
+                    </a>
+                </div>
+                <div class="dropdown text-end">
+                    <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <!-- <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle"> -->
+                        <span>환영합니다, {{data.current_user_id}}님</span>
+                    </a>
+                    <ul class="dropdown-menu text-small">
+                        <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
     <div class="container">
-        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-            <div class="btn btn-outline-primary btn-sm disabled"> {{ data.content.category }} </div>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+            <div class="btn btn-outline-primary btn-sm disabled"> Category {{ data.content.category }} </div>
             {% if data.is_content_owner is true %}
-            <a class="btn btn-secondary btn-sm" href="/edit/{{ data.contentinfo_id }}" role="button">수정 / 삭제</a>
+            <div>
+                <a class="btn btn-secondary btn-sm" href="/edit/{{ data.contentinfo_id }}" role="button">수정</a>
+                <a class="btn btn-danger btn-sm" href="/delete/{{ data.contentinfo_id }}" role="button">삭제</a>
+            </div>
             {% endif %}
         </div>
         <p></p>
         <div class="content">
-			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
-			<!-- 게시판에 글 목록들이 홀수와 짝수가 번갈아가며 색상이 변경됨. -->
+            <table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
+                <!-- 게시판에 글 목록들이 홀수와 짝수가 번갈아가며 색상이 변경됨. -->
                 <thead>
-					<tr>
-						<th colspan="2" style="background-color: #ffffff; text-align: center; font-size: 20px">{{ data.content.title }}</th>
-					</tr>
+                    <tr>
+                        <th colspan="2" style="background-color: #ffffff; text-align: center; font-size: 20px">{{
+                            data.content.title }}</th>
+                    </tr>
                     <tr>
                         <th colspan="2" style="background-color: #eeeeee; text-align: left;">
                             작성자: {{ data.content.userinfo_id }}
@@ -36,20 +70,18 @@
                             작성일시: {{ data.content.create_date }} | 수정일시: {{ data.content.update_date }}
                         </td>
                     </tr>
-				</thead>
-			</table>
+                </thead>
+            </table>
             {% for item in data.content.images %}
-            <p>
-                <img src="{{ item }}" alt="">
-            </p>
+            <p class="ms-3"><img src="{{ item }}" alt=""></p>
             {% endfor %}
-            <p>{{ data.content.content }}</p>
-		</div>
+            <p class="ms-3">{{ data.content.content }}</p>
+        </div>
         <hr>
-	</div>
+    </div>
     <div class="container">
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <a href="/write" class="btn btn-outline-dark" style="align: right">글 쓰기</a>
+            <a href="/write" class="btn btn-outline-dark">글 쓰기</a>
         </div>
         <h2>comments</h2>
         <table class="table">
@@ -62,14 +94,29 @@
             </thead>
             <tbody id="comments">
                 {% for item in data.comments %}
-                <tr>
+                <tr id="cm_row_{{ item.row_id }}">
                     <td>{{ item.userinfo_id }}</td>
-                    <td>{{ item.comment }}</td>
+                    <td id="cm_row_{{ item.row_id }}_cmt_view" style="display: run-in">
+                        {{ item.comment }}
+                    </td>
+                    <td colspan="2" id="cm_row_{{ item.row_id }}_cmt_edit" style="display: none">
+                        <label for="edit_comment_{{ item.row_id }}" style="display: none">>댓글 수정</label>
+                        <textarea class="form-control" cols="25" rows="1"
+                                  id="edit_comment_{{ item.row_id }}"></textarea>
+                    </td>
                     {% if item.is_comment_owner is true %}
-                    <td>{{ item.cm_update_date }}</td>
-                    <td>
-                        <button class="btn btn-secondary pull-right" type="button" onclick="getUserName()">Edit</button>
-                        <button class="btn btn-danger pull-right" type="button" onclick="getUserName()">Delete</button>
+                    <td id="cm_row_{{ item.row_id }}_udate" style="display: run-in">{{ item.cm_update_date }}</td>
+                    <td id="cm_row_{{ item.row_id }}_btns" style="display: run-in">
+                        <button class="btn btn-secondary pull-right" type="button"
+                                onclick="isEditClicked({{ item.row_id }})">Edit</button>
+                        <button class="btn btn-danger pull-right" type="button"
+                                onclick="deleteConfirm({{ item.row_id }})">Delete</button>
+                    </td>
+                    <td id="cm_row_{{ item.row_id }}_edit_btn" style="display: none">
+                        <button class="btn btn-secondary pull-right" type="button"
+                                onclick="isEditClicked({{ item.row_id }})">Cancel</button>
+                        <button class="btn btn-primary pull-right" type="button"
+                                onclick="isEditConfirmed({{ item.row_id }})">Confirm</button>
                     </td>
                     {% else %}
                     <td colspan="2">{{ item.cm_update_date }}</td>
@@ -77,11 +124,24 @@
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <td>{{ data.current_user_id }}</td>
+                    <td colspan="3">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="input_comment">
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-danger" onclick="inputConfirm()">submit</button>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
         </table>
-        {% if data.is_more_comment is true %}
-        <form method="post">
-            <button class="btn btn-primary" type="submit" style="width: 100%">더 보기</button>
-        </form>
+        {% if data.more_comment_cursor != None %}
+        <button id="more_comment_btn" class="btn btn-primary" type="submit"
+                style="width: 100%; display: run-in;"
+                onclick="moreComments('{{ data.more_comment_cursor }}')">더 보기</button>
         <p></p>
         {% endif %}
     </div>
@@ -93,6 +153,136 @@
     <script>
         history.replaceState({}, null, location.pathname);
     </script>
-</body>
+    <script>
+        function inputConfirm() {
+            if (window.confirm("해당 댓글을 게시하시겠습니까?")) {
+                var cm = document.getElementById('input_comment').value
+                if (!cm) {
+                    window.alert("빈 댓글은 게시할 수 없습니다. 다시 확인해주세요.");
+                } else {
+                    var postData = {
+                        'insert_comment': cm
+                    }
+                    $.ajax({
+                        type: 'POST',
+                        url: '{{ url_for("view", contentinfo_id=data.contentinfo_id) }}',
+                        data: JSON.stringify(postData),
+                        dataType: 'JSON',
+                        contentType: "application/json",
+                        success: function (data) {
+                            var cm_tag = document.getElementById('cm_row_' + data)
+                            cm_tag.remove()
+                        }
+                    })
+                }
+            }
+        }
 
+        function isEditClicked(rowId, newCm = null, newUdate = null) {
+            // 수정 버튼 누름
+
+            var cm_row_cmt_view_tag = document.getElementById('cm_row_' + rowId + '_cmt_view');
+            var cm_row_cmt_edit_tag = document.getElementById('cm_row_' + rowId + '_cmt_edit');
+            var cm_row_udate_tag = document.getElementById('cm_row_' + rowId + '_udate');
+            var cm_row_btns_tag = document.getElementById('cm_row_' + rowId + '_btns');
+            var cm_row_edit_btn_tag = document.getElementById('cm_row_' + rowId + '_edit_btn');
+
+            if (cm_row_cmt_view_tag.style.display == '') {
+                // 수정 진행 시
+                cm_row_cmt_edit_tag.children[1].value = cm_row_cmt_view_tag.innerText;
+
+                cm_row_cmt_view_tag.style.display = 'none';
+                cm_row_cmt_edit_tag.style.display = '';
+
+                cm_row_udate_tag.style.display = 'none';
+                cm_row_btns_tag.style.display = 'none';
+                cm_row_edit_btn_tag.style.display = '';
+            } else {
+                // 수정 취소 or 수정 완료 시
+                cm_row_cmt_edit_tag.children[1].value = null;
+                if (newCm) {
+                    cm_row_cmt_view_tag.innerText = newCm;
+                    cm_row_udate_tag.innerText = newUdate;
+                }
+
+                cm_row_cmt_view_tag.style.display = '';
+                cm_row_cmt_edit_tag.style.display = 'none';
+
+                cm_row_udate_tag.style.display = '';
+                cm_row_btns_tag.style.display = '';
+                cm_row_edit_btn_tag.style.display = 'none';
+            }
+        }
+
+        function isEditConfirmed(rowId) {
+            var cm = document.getElementById('edit_comment_' + rowId).value;
+            if (!cm) {
+                window.alert("빈 댓글로 수정할 수 없습니다. 다시 확인해주세요.");
+            } else {
+                var postData = {
+                    'update_item': rowId,
+                    'update_comment': cm
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ url_for("view", contentinfo_id=data.contentinfo_id) }}',
+                    data: JSON.stringify(postData),
+                    dataType : 'JSON',
+                    contentType: "application/json",
+                    success: function(data) {
+                        isEditClicked(data.row_id, data.comment, data.udate);
+                    }
+                })
+            }
+        }
+
+        function deleteConfirm(rowId) {
+            if (window.confirm("해당 댓글을 삭제하시겠습니까?")) {
+                var postData = {
+                    'delete_item': rowId
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ url_for("view", contentinfo_id=data.contentinfo_id) }}',
+                    data: JSON.stringify(postData),
+                    dataType : 'JSON',
+                    contentType: "application/json",
+                    success: function(data) {
+                        var cmTag = document.getElementById('cm_row_' + data);
+                        cmTag.remove();
+                    }
+                })
+            }
+        }
+
+        function moreComments(cursor) {
+            var postData = {
+                'cursor': cursor
+            }
+            $.ajax({
+                type: 'POST',
+                url: '{{ url_for("view", contentinfo_id=data.contentinfo_id) }}',
+                data: JSON.stringify(postData),
+                dataType : 'JSON',
+                contentType: "application/json",
+                success: function(data) {
+                    var more_cmt_btn = document.getElementById('more_comment_btn');
+                    if (!data.more_comment_cursor) {
+                        more_cmt_btn.style.display = 'none';
+                    } else {
+                        more_cmt_btn.setAttribute('onclick', "moreComments('" + data.more_comment_cursor + "')");
+                    }
+                    var commentsTag = document.getElementById("comments");
+                    for (let i = 0; i < data.comments_html.length; i++){
+                        var item = data.comments_html[i];
+                        var cmTag = document.createElement('tr');
+                        cmTag.setAttribute('id', 'cm_row_' + item.id)
+                        cmTag.innerHTML = item.html_text;
+                        commentsTag.appendChild(cmTag);
+                    }
+                }
+            })
+        }
+    </script>
+</body>
 </html>
