@@ -293,7 +293,7 @@ def view(contentinfo_id):
                         is_comment_owner = False
                 else:
                     is_comment_owner = False
-                html_text = f"""<td>{session["userid"]}</td>
+                html_text = f"""<td>{row["userinfo_id"]}</td>
     <td id="cm_row_{item.id}_cmt_view" style="display: run-in">
         {row["comment"]}
     </td>
