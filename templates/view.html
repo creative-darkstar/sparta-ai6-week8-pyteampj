@@ -38,7 +38,7 @@
 
     <div class="container">
         <div class="d-grid gap-2 d-md-flex justify-content-md-between">
-            <div class="btn btn-outline-primary btn-sm disabled"> {{ data.content.category }} </div>
+            <div class="btn btn-outline-primary btn-sm disabled"> Category {{ data.content.category }} </div>
             {% if data.is_content_owner is true %}
             <div>
                 <a class="btn btn-secondary btn-sm" href="/edit/{{ data.contentinfo_id }}" role="button">수정</a>
@@ -90,17 +90,27 @@
                 {% for item in data.comments %}
                 <tr id="cm_row_{{ item.row_id }}">
                     <td>{{ item.userinfo_id }}</td>
-                    <td id="cm_row_{{ item.row_id }}_comment">{{ item.comment }}</td>
+                    <td id="cm_row_{{ item.row_id }}_cmt_view" style="display: run-in">
+                        {{ item.comment }}
+                    </td>
+                    <td colspan="2" id="cm_row_{{ item.row_id }}_cmt_edit" style="display: none">
+                        <label for="edit_comment_{{ item.row_id }}" style="display: none">>댓글 수정</label>
+                        <textarea class="form-control" cols="25" rows="1"
+                                  id="edit_comment_{{ item.row_id }}"></textarea>
+                    </td>
                     {% if item.is_comment_owner is true %}
-                    <td id="cm_row_{{ item.row_id }}_udate">{{ item.cm_update_date }}</td>
-                    <td>
-<!--                        <div class="wrap">-->
-<!--                            <button class="btn btn-secondary pull-right" type="button">Edit</button>-->
-<!--                        </div>-->
+                    <td id="cm_row_{{ item.row_id }}_udate" style="display: run-in">{{ item.cm_update_date }}</td>
+                    <td id="cm_row_{{ item.row_id }}_btns" style="display: run-in">
                         <button class="btn btn-secondary pull-right" type="button"
-                                onclick="isEdit({{ item.row_id }})">Edit</button>
+                                onclick="isEditClicked({{ item.row_id }})">Edit</button>
                         <button class="btn btn-danger pull-right" type="button"
                                 onclick="deleteConfirm({{ item.row_id }})">Delete</button>
+                    </td>
+                    <td id="cm_row_{{ item.row_id }}_edit_btn" style="display: none">
+                        <button class="btn btn-secondary pull-right" type="button"
+                                onclick="isEditClicked({{ item.row_id }})">Cancel</button>
+                        <button class="btn btn-primary pull-right" type="button"
+                                onclick="isEditConfirmed({{ item.row_id }})">Confirm</button>
                     </td>
                     {% else %}
                     <td colspan="2">{{ item.cm_update_date }}</td>
@@ -113,7 +123,7 @@
                     <td>{{ data.current_user_id }}</td>
                     <td colspan="3">
                         <div class="mb-3">
-                            <input type="text" class="form-control" id="inputComment" name="inputComment">
+                            <input type="text" class="form-control" id="input_comment">
                         </div>
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <button type="submit" class="btn btn-danger" onclick="inputConfirm()">submit</button>
@@ -122,10 +132,10 @@
                 </tr>
             </tfoot>
         </table>
-        {% if data.is_more_comment is true %}
-        <form method="post">
-            <button class="btn btn-primary" type="submit" style="width: 100%">더 보기</button>
-        </form>
+        {% if data.more_comment_cursor != None %}
+        <button id="more_comment_btn" class="btn btn-primary" type="submit"
+                style="width: 100%; display: run-in;"
+                onclick="moreComments('{{ data.more_comment_cursor }}')">더 보기</button>
         <p></p>
         {% endif %}
     </div>
@@ -138,11 +148,82 @@
         history.replaceState({}, null, location.pathname);
     </script>
     <script>
-        function isEdit(rowId) {
-            console.log("수정 버튼 누름");
-            var cm_row_tag = document.getElementById('cm_row_' + rowId)
-            const editDiv = document.createElement('div');
-            const editText = document.createTextNode('안녕하세요');
+        function inputConfirm() {
+            if (window.confirm("해당 댓글을 게시하시겠습니까?")) {
+                var cm = document.getElementById('input_comment').value
+                if (!cm) {
+                    window.alert("빈 댓글은 게시할 수 없습니다. 다시 확인해주세요.");
+                } else {
+                    var postdata = {
+                        'insert_comment': cm
+                    }
+                    $.ajax({
+                        type: 'POST',
+                        url: '{{ url_for('view', contentinfo_id=data.contentinfo_id) }}',
+                        data: JSON.stringify(postdata),
+                        dataType : 'JSON',
+                        contentType: "application/json",
+                    })
+                }
+            }
+        }
+
+        function isEditClicked(rowId, newCm = null, newUdate = null) {
+            // 수정 버튼 누름
+
+            var cm_row_cmt_view_tag = document.getElementById('cm_row_' + rowId + '_cmt_view');
+            var cm_row_cmt_edit_tag = document.getElementById('cm_row_' + rowId + '_cmt_edit');
+            var cm_row_udate_tag = document.getElementById('cm_row_' + rowId + '_udate');
+            var cm_row_btns_tag = document.getElementById('cm_row_' + rowId + '_btns');
+            var cm_row_edit_btn_tag = document.getElementById('cm_row_' + rowId + '_edit_btn');
+
+            if (cm_row_cmt_view_tag.style.display == '') {
+                // 수정 진행 시
+                cm_row_cmt_edit_tag.children[1].value = cm_row_cmt_view_tag.innerText;
+
+                cm_row_cmt_view_tag.style.display = 'none';
+                cm_row_cmt_edit_tag.style.display = '';
+
+                cm_row_udate_tag.style.display = 'none';
+                cm_row_btns_tag.style.display = 'none';
+                cm_row_edit_btn_tag.style.display = '';
+            } else {
+                // 수정 취소 or 수정 완료 시
+                cm_row_cmt_edit_tag.children[1].value = null;
+                if (newCm) {
+                    cm_row_cmt_view_tag.innerText = newCm;
+                    cm_row_udate_tag.innerText = newUdate;
+                }
+
+                cm_row_cmt_view_tag.style.display = '';
+                cm_row_cmt_edit_tag.style.display = 'none';
+
+                cm_row_udate_tag.style.display = '';
+                cm_row_btns_tag.style.display = '';
+                cm_row_edit_btn_tag.style.display = 'none';
+            }
+        }
+
+        function isEditConfirmed(rowId) {
+            var cm = document.getElementById('edit_comment_' + rowId).value;
+            if (!cm) {
+                window.alert("빈 댓글로 수정할 수 없습니다. 다시 확인해주세요.");
+            } else {
+                var postData = {
+                    'update_item': rowId,
+                    'update_comment': cm
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ url_for("view", contentinfo_id=data.contentinfo_id) }}',
+                    data: JSON.stringify(postData),
+                    dataType : 'JSON',
+                    contentType: "application/json",
+                    success: function(data) {
+                        isEditClicked(data.row_id, data.comment, data.udate);
+                    }
+                })
+            }
         }
 
         function deleteConfirm(rowId) {
@@ -157,101 +238,41 @@
                     dataType : 'JSON',
                     contentType: "application/json",
                     success: function(data) {
-                        var cm_tag = document.getElementById('cm_row_' + data)
-                        cm_tag.remove()
+                        var cmTag = document.getElementById('cm_row_' + data);
+                        cmTag.remove();
                     }
                 })
-                console.log("확인. 삭제 완료");
-            } else {
-                console.log("취소. 변화 없음");
             }
         }
 
-        function inputConfirm() {
-            if (window.confirm("해당 댓글을 게시하시겠습니까?")) {
-                var cm = document.getElementById('inputComment').value
-                if (!cm) {
-                    window.alert("빈 댓글은 게시할 수 없습니다. 다시 확인해주세요.");
-                } else {
-                    var postdata = {
-                        'comment': cm
-                    }
-                    $.ajax({
-                        type: 'POST',
-                        url: '{{ url_for('view', contentinfo_id=data.contentinfo_id) }}',
-                        data: JSON.stringify(postdata),
-                        dataType : 'JSON',
-                        contentType: "application/json",
-                    })
-                    console.log("확인. 게시 완료");
-                }
-            } else {
-                console.log("취소. 게시 취소");
+        function moreComments(cursor) {
+            var postData = {
+                'cursor': cursor
             }
+            $.ajax({
+                type: 'POST',
+                url: '{{ url_for("view", contentinfo_id=data.contentinfo_id) }}',
+                data: JSON.stringify(postData),
+                dataType : 'JSON',
+                contentType: "application/json",
+                success: function(data) {
+                    var more_cmt_btn = document.getElementById('more_comment_btn');
+                    if (!data.more_comment_cursor) {
+                        more_cmt_btn.style.display = 'none';
+                    } else {
+                        more_cmt_btn.setAttribute('onclick', "moreComments('" + data.more_comment_cursor + "')");
+                    }
+                    var commentsTag = document.getElementById("comments");
+                    for (let i = 0; i < data.comments_html.length; i++){
+                        var item = data.comments_html[i];
+                        var cmTag = document.createElement('tr');
+                        cmTag.setAttribute('id', 'cm_row_' + item.id)
+                        cmTag.innerHTML = item.html_text;
+                        commentsTag.appendChild(cmTag);
+                    }
+                }
+            })
         }
     </script>
-<!--    <script>-->
-<!--        var editBtn = document.querySelectorAll('.btn_edit');-->
-<!--        var deleteBtn = document.querySelectorAll('.btn_delete');-->
-<!--        // var editBtnPopClose = document.querySelectorAll('.edit_pop_wrap .btn_close');-->
-<!--        var editBtnPopConfirm = document.querySelectorAll('.edit_pop_wrap .btn_confirm');-->
-<!--        var deleteBtnPopClose = document.querySelectorAll('.delete_pop_wrap .btn_close');-->
-<!--        var deleteBtnPopConfirm = document.querySelectorAll('.delete_pop_wrap .btn_confirm');-->
-<!--        var editPopID;-->
-<!--        var deletePopID;-->
-<!--        var isEditPop = false;-->
-<!--        var isDeletePop = false;-->
-
-<!--        // 수정 팝업 열기-->
-<!--        for(var e_i = 0; e_i < editBtn.length; e_i++){-->
-<!--            editBtn[e_i].addEventListener('click', function(){-->
-<!--                editPopID = this.getAttribute('name');-->
-<!--                if (!isEditPop) {-->
-<!--                    document.querySelector(editPopID).style.display = 'block';-->
-<!--                } else {-->
-<!--                    document.querySelector(editPopID).style.display = 'none';-->
-<!--                }-->
-<!--            });-->
-<!--        }-->
-
-<!--        /*-->
-<!--        // 수정 팝업 닫기-->
-<!--        for(var e_j = 0; e_j < editBtnPopClose.length; e_j++){-->
-<!--            editBtnPopClose[e_j].addEventListener('click', function(){-->
-<!--                this.parentNode.parentNode.style.display = 'none';-->
-<!--            });-->
-<!--        }-->
-<!--        */-->
-
-<!--        // 수정 팝업 확인-->
-<!--        for(var e_k = 0; e_k < editBtnPopConfirm.length; e_k++){-->
-<!--            editBtnPopConfirm[e_k].addEventListener('click', function(){-->
-<!--                this.parentNode.parentNode.style.display = 'none';-->
-<!--            });-->
-<!--        }-->
-
-<!--        // 삭제 팝업 열기-->
-<!--        for(var d_i = 0; d_i < editBtn.length; d_i++){-->
-<!--            deleteBtn[d_i].addEventListener('click', function(){-->
-<!--                deletePopID = this.getAttribute('href');-->
-<!--                document.querySelector(deletePopID).style.display = 'block';-->
-<!--            });-->
-<!--        }-->
-
-<!--        // 삭제 팝업 닫기-->
-<!--        for(var d_j = 0; d_j < deleteBtnPopClose.length; d_j++){-->
-<!--            deleteBtnPopClose[d_j].addEventListener('click', function(){-->
-<!--                this.parentNode.parentNode.style.display = 'none';-->
-<!--            });-->
-<!--        }-->
-
-<!--        // 삭제 팝업 확인-->
-<!--        for(var d_k = 0; d_k < deleteBtnPopConfirm.length; d_k++){-->
-<!--            deleteBtnPopConfirm[d_k].addEventListener('click', function(){-->
-<!--                this.parentNode.parentNode.style.display = 'none';-->
-<!--            });-->
-<!--        }-->
-<!--    </script>-->
 </body>
-
 </html>
