@@ -4,6 +4,7 @@ from db_handler import Database
 from flask import Flask, request, render_template, session, url_for, redirect
 from login import check_login_data, check_login
 from register import check_id, check_signup_data, check_password, set_user_info
+from google.cloud.firestore_v1.base_query import FieldFilter
 
 app = Flask(__name__)
 app.secret_key = 'super secret key'
@@ -91,6 +92,15 @@ def mainpage3():
     content_info = Database.get_contentinfo()
     ccl = list(content_info.where("category", "==", "3").where("is_visible", "==", True).stream())
     return render_template("mainpage1.html", ccl=ccl, session_id=session_id)
+
+@app.route("/search", methods=['GET', 'POST'])
+def search():
+    session_id = session['userid']
+    searching=request.form['search_id']
+    print(searching)
+    content_info = Database.get_contentinfo()
+    ccl = list(content_info.where(filter=FieldFilter("userinfo_id", "==", searching)).where(filter=FieldFilter("is_visible", "==", True)).stream())
+    return render_template('search.html',ccl=ccl,session_id=session_id)
 
 
 @app.route("/logout")
