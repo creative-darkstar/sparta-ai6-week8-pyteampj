@@ -81,7 +81,7 @@
     </div>
     <div class="container">
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <a href="/write" class="btn btn-outline-dark"">글 쓰기</a>
+            <a href="/write" class="btn btn-outline-dark">글 쓰기</a>
         </div>
         <h2>comments</h2>
         <table class="table">
@@ -160,7 +160,7 @@
                 if (!cm) {
                     window.alert("빈 댓글은 게시할 수 없습니다. 다시 확인해주세요.");
                 } else {
-                    var postdata = {
+                    var postData = {
                         'insert_comment': cm
                     }
                     $.ajax({

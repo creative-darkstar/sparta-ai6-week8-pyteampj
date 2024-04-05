@@ -74,7 +74,7 @@ def register():
 def mainpage1():
     session_id = session['userid']
     content_info = Database.get_contentinfo()
-    ccl = list(content_info.where("category", "==", "1").where("is_visible", "==", True).stream())
+    ccl = list(content_info.where(filter=FieldFilter("category", "==", "1")).where(filter=FieldFilter("is_visible", "==", True)).stream())
     return render_template("mainpage1.html", ccl=ccl, session_id=session_id)
 
 
@@ -82,7 +82,7 @@ def mainpage1():
 def mainpage2():
     session_id = session['userid']
     content_info = Database.get_contentinfo()
-    ccl = list(content_info.where("category", "==", "2").where("is_visible", "==", True).stream())
+    ccl = list(content_info.where(filter=FieldFilter("category", "==", "2")).where(filter=FieldFilter("is_visible", "==", True)).stream())
     return render_template("mainpage1.html", ccl=ccl, session_id=session_id)
 
 
@@ -90,8 +90,9 @@ def mainpage2():
 def mainpage3():
     session_id = session['userid']
     content_info = Database.get_contentinfo()
-    ccl = list(content_info.where("category", "==", "3").where("is_visible", "==", True).stream())
+    ccl = list(content_info.where(filter=FieldFilter("category", "==", "3")).where(filter=FieldFilter("is_visible", "==", True)).stream())
     return render_template("mainpage1.html", ccl=ccl, session_id=session_id)
+
 
 @app.route("/search", methods=['GET', 'POST'])
 def search():
